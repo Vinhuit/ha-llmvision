@@ -1,6 +1,6 @@
 blueprint:
-  name: AI Event Summary (v1.4.6)
-  author: valentinfrlch
+  name: AI Event Summary (v1.4.7)
+  author: valentinfrlch, Vinhuit
   description: >
     AI-powered summaries for security camera events.
     Sends a notification with a preview to your phone that is updated dynamically when the AI summary is available.
@@ -492,6 +492,22 @@ variables:
   camera_file_path: >
     {{ camera_entity_snapshot.replace("camera.", "")}}
   file_path: !input file_path
+  snapshot_cleanup_folder:
+    name: Snapshot Cleanup Folder
+    description: The folder path to clean up old snapshots from.
+    default: /config/www/snapshots/{{ camera_file_path }}
+    selector:
+      text:
+        multiline: false
+  snapshot_retention_days:
+    name: Snapshot Retention Days
+    description: Number of days to keep snapshots before cleanup.
+    default: 3
+    selector:
+      number:
+        min: 1
+        max: 30
+        step: 1
 
 max_exceeded: silent
 mode: single
@@ -719,7 +735,7 @@ action:
   # Facebook Messenger notification
   - if:
       - condition: template
-        value_template: "{{ fb_notify and fb_psid != '' }}"
+        value_template: "{{ fb_notify }}"
     then:
       - alias: "Facebook Messenger notification to recipient(s)"
         repeat:
@@ -728,12 +744,12 @@ action:
             - action: notify.fb_messenger
               data:
                 message: "{{response.response_text}}"
-                target: "{{ fb_psid }}"
+                target: "{{fb_psid}}"
 
   # Telegram Bot notification
   - if:
       - condition: template
-        value_template: "{{ telegram_notify and telegram_channel != '' }}"
+        value_template: "{{ telegram_notify }}"
     then:
       - alias: "Telegram notification to channel(s)"
         repeat:
@@ -749,8 +765,8 @@ action:
   - alias: "Cleanup old snapshots"
     service: shell_command.cleanup_snapshots
     data:
-      folder: "/config/www/snapshots/{{ camera_file_path }}"
-      days: 3
+      folder: !input snapshot_cleanup_folder
+      days: !input snapshot_retention_days
 
   # Add Customized Actions
   - choose: []
