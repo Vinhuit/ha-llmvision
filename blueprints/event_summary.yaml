@@ -470,6 +470,12 @@ variables:
   notification_sound: !input notification_sound
   notification_volume: !input notification_volume
   notification_critical: !input notification_critical
+  fb_notify: !input fb_notify
+  fb_psid: !input fb_psid
+  fb_message: !input fb_message
+  telegram_notify: !input telegram_notify
+  telegram_channel: !input telegram_channel
+  telegram_message: !input telegram_message
   tts_volume: !input tts_volume
   tts_notification: !input tts_notification
   condition_notify_tts: !input condition_notify_tts
