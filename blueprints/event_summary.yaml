@@ -1,6 +1,6 @@
 blueprint:
-  name: AI Event Summary (v1.4.5)
-  author: valentinfrlch, Vinhuit
+  name: AI Event Summary (v1.4.6)
+  author: valentinfrlch
   description: >
     AI-powered summaries for security camera events.
     Sends a notification with a preview to your phone that is updated dynamically when the AI summary is available.
@@ -721,24 +721,29 @@ action:
       - condition: template
         value_template: "{{ fb_notify and fb_psid != '' }}"
     then:
-      - action: notify.fb_messenger
-        data:
-          message: >
-            {{ fb_message if fb_message else response.response_text }}
-          target: "{{ fb_psid }}"
+      - alias: "Facebook Messenger notification to recipient(s)"
+        repeat:
+          for_each: "{{device_name_map}}"
+          sequence:
+            - action: notify.fb_messenger
+              data:
+                message: "{{response.response_text}}"
+                target: "{{ fb_psid }}"
 
   # Telegram Bot notification
   - if:
       - condition: template
         value_template: "{{ telegram_notify and telegram_channel != '' }}"
     then:
-      - action: telegram_bot.send_message
-        data:
-          message: >
-            {{ telegram_message if telegram_message else response.response_text }}
-          title: Notification from {{ camera }}
-          target: >
-            {{ telegram_channel }}
+      - alias: "Telegram notification to channel(s)"
+        repeat:
+          for_each: "{{device_name_map}}"
+          sequence:
+            - action: telegram_bot.send_message
+              data:
+                message: "{{ response.response_text }}"
+                title: Notification from {{ camera }}
+                target: "{{ telegram_channel }}"
 
   # Cleanup old snapshots: retain only the last N days
   - alias: "Cleanup old snapshots"
