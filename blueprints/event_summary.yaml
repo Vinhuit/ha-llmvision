@@ -191,6 +191,9 @@ blueprint:
                   value: /media/local/snapshots/{{ camera_file_path }}/last_motion.jpg
                 - label: Public Folder - Unsecured
                   value: /config/www/snapshots/{{ camera_file_path }}/last_motion.jpg
+                - label: Multi snapshot Folder - Unsecured
+                  value: /config/www/snapshots/{{ camera_file_path }}/{{ now().strftime('%Y-%m-%d_%H-%M-%S') }}_last_motion.jpg                  
+
               custom_value: true
         tap_navigate:
           name: Tap Navigate
@@ -369,6 +372,20 @@ blueprint:
           default: false
           selector:
             boolean: {}
+        # Facebook Messenger Notify
+        fb_notify:
+          name: Facebook Messenger Notify
+          description: Send a notification to your Facebook Messenger account.
+          default: false
+          selector:
+            boolean:
+        # Telegram Notify
+        telegram_notify:
+          name: Telegram Notify
+          description: Send a notification to your Telegram account.
+          default: false
+          selector:
+            boolean:
     # Experimental Section
     experimental_section:
       name: Experimental Settings
@@ -670,6 +687,31 @@ action:
                       priority: high
                       media_stream: !input tts_volume
                       tts_text: "{{response.response_text}}"
+
+  # Facebook Messenger notification
+  - if:
+      - condition: template
+        value_template: "{{ fb_notify }}"
+    then:
+      - service: notify.fb_messenger
+        data:
+          message: "{{ response.response_text }}"
+
+  # Telegram notification
+  - if:
+      - condition: template
+        value_template: "{{ telegram_notify }}"
+    then:
+      - service: notify.telegram
+        data:
+          message: "{{ response.response_text }}"
+
+  # Cleanup old snapshots: retain only the last N days
+  - alias: "Cleanup old snapshots"
+    service: shell_command.cleanup_snapshots
+    data:
+      folder: "/config/www/snapshots/{{ camera_file_path }}"
+      days: 3
 
   # Add Customized Actions
   - choose: []
