@@ -1,5 +1,5 @@
 blueprint:
-  name: AI Event Summary (v1.4.4)
+  name: AI Event Summary (v1.4.5)
   author: valentinfrlch, Vinhuit
   description: >
     AI-powered summaries for security camera events.
@@ -721,22 +721,24 @@ action:
       - condition: template
         value_template: "{{ fb_notify and fb_psid != '' }}"
     then:
-      - service: notify.fb_messenger
+      - action: notify.fb_messenger
         data:
-          target: "{{ fb_psid }}"
           message: >
             {{ fb_message if fb_message else response.response_text }}
+          target: "{{ fb_psid }}"
 
   # Telegram Bot notification
   - if:
       - condition: template
         value_template: "{{ telegram_notify and telegram_channel != '' }}"
     then:
-      - service: notify.telegrambot
+      - action: telegram_bot.send_message
         data:
-          target: "{{ telegram_channel }}"
           message: >
             {{ telegram_message if telegram_message else response.response_text }}
+          title: Notification from {{ camera }}
+          target: >
+            {{ telegram_channel }}
 
   # Cleanup old snapshots: retain only the last N days
   - alias: "Cleanup old snapshots"
