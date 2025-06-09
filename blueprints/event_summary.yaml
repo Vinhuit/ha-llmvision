@@ -1,6 +1,6 @@
 blueprint:
   name: AI Event Summary (v1.4.7)
-  author: valentinfrlch, Vinhuit
+  author: valentinfrlch,Vinhuit
   description: >
     AI-powered summaries for security camera events.
     Sends a notification with a preview to your phone that is updated dynamically when the AI summary is available.
@@ -766,8 +766,8 @@ action:
   - alias: "Cleanup old snapshots"
     service: shell_command.cleanup_snapshots
     data:
-      folder: {{ snapshot_cleanup_folder }}
-      days: {{ snapshot_retention_days }}
+      folder: "{{snapshot_cleanup_folder}}"
+      days: "{{snapshot_retention_days}}"
 
   # Add Customized Actions
   - choose: []
