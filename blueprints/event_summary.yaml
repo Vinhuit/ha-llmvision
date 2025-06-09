@@ -1,6 +1,6 @@
 blueprint:
   name: AI Event Summary (v1.4.4)
-  author: valentinfrlch
+  author: valentinfrlch, Vinhuit
   description: >
     AI-powered summaries for security camera events.
     Sends a notification with a preview to your phone that is updated dynamically when the AI summary is available.
@@ -379,13 +379,41 @@ blueprint:
           default: false
           selector:
             boolean:
-        # Telegram Notify
+        fb_psid:
+          name: Facebook Messenger PSID
+          description: The PSID (Page-scoped ID) of the Facebook Messenger recipient.
+          default: ''
+          selector:
+            text:
+              multiline: false
+        fb_message:
+          name: Facebook Messenger Message
+          description: The message to send to Facebook Messenger. Leave blank to use the AI summary.
+          default: ''
+          selector:
+            text:
+              multiline: true
+        # Telegram Bot Notify
         telegram_notify:
           name: Telegram Notify
           description: Send a notification to your Telegram account.
           default: false
           selector:
             boolean:
+        telegram_channel:
+          name: Telegram Channel ID
+          description: The channel ID or chat ID to send the message to (e.g., @mychannel or -1001234567890).
+          default: ''
+          selector:
+            text:
+              multiline: false
+        telegram_message:
+          name: Telegram Message
+          description: The message to send to Telegram. Leave blank to use the AI summary.
+          default: ''
+          selector:
+            text:
+              multiline: true
     # Experimental Section
     experimental_section:
       name: Experimental Settings
@@ -691,20 +719,24 @@ action:
   # Facebook Messenger notification
   - if:
       - condition: template
-        value_template: "{{ fb_notify }}"
+        value_template: "{{ fb_notify and fb_psid != '' }}"
     then:
       - service: notify.fb_messenger
         data:
-          message: "{{ response.response_text }}"
+          target: "{{ fb_psid }}"
+          message: >
+            {{ fb_message if fb_message else response.response_text }}
 
-  # Telegram notification
+  # Telegram Bot notification
   - if:
       - condition: template
-        value_template: "{{ telegram_notify }}"
+        value_template: "{{ telegram_notify and telegram_channel != '' }}"
     then:
-      - service: notify.telegram
+      - service: notify.telegrambot
         data:
-          message: "{{ response.response_text }}"
+          target: "{{ telegram_channel }}"
+          message: >
+            {{ telegram_message if telegram_message else response.response_text }}
 
   # Cleanup old snapshots: retain only the last N days
   - alias: "Cleanup old snapshots"
