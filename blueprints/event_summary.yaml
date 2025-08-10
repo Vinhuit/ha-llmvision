@@ -778,8 +778,8 @@ action:
   - alias: "Cleanup old snapshots"
     service: shell_command.cleanup_snapshots
     data:
-      folder: "{{snapshot_cleanup_folder}}"
-      days: "{{snapshot_retention_days}}"
+      folder: "{{ snapshot_cleanup_folder }}"
+      days: "{{ snapshot_retention_days }}"
 
   # Add Customized Actions
   - choose: []
