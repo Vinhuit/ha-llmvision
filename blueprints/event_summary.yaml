@@ -760,13 +760,19 @@ action:
     then:
       - alias: "Telegram notification to channel(s)"
         repeat:
-          for_each: "{{device_name_map}}"
+          for_each: "{{ device_name_map }}"
           sequence:
-            - action: telegram_bot.send_message
+            - action: telegram_bot.send_photo
               data:
-                message: "{{ response.response_text }}"
-                title: Notification from {{ camera }}
                 target: "{{ telegram_channel }}"
+                file: "{{ file_path }}"
+                caption: |
+                  🚨 **CẢNH BÁO CAMERA** 🚨
+                  📷 Camera: {{ camera }}
+                  🕒 Thời gian: {{ now().strftime('%d/%m/%Y %H:%M:%S') }}
+                  💬 Nội dung: {{ response.response_text }}
+
+                  👉 Kiểm tra ngay để đảm bảo an toàn!
 
   # Cleanup old snapshots: retain only the last N days
   - alias: "Cleanup old snapshots"
